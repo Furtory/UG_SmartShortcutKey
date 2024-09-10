@@ -133,3 +133,19 @@ loop
 }
 return
 
+~$Alt::
+if (MouseBlockInput=1)
+{
+  BlockInput MouseMoveOff
+  
+  loop
+  {
+    Sleep 30
+    if !GetKeyState("Alt", "P")
+    {
+      BlockInput MouseMove
+      break
+    }
+  }
+}
+return

@@ -122,6 +122,11 @@ loop
   else if (WheelTickCount>WheelTickCountRecord) and (Mode=1)
   {
     WheelTickCountRecord:=WheelTickCount
+    if (AutoLock=1)
+    {
+      BlockInput MouseMove
+      MouseBlockInput:=1
+    }
     Send {Shift Down}
     Send {Tab}
     Send {Shift Up}
@@ -129,6 +134,11 @@ loop
   }
   else if (WheelTickCount<WheelTickCountRecord) and (Mode=1)
   {
+    if (AutoLock=1)
+    {
+      BlockInput MouseMove
+      MouseBlockInput:=1
+    }
     WheelTickCountRecord:=WheelTickCount
     Send {Tab}
     continue

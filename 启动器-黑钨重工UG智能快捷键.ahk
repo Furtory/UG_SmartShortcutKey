@@ -363,6 +363,7 @@ else
 Critical, Off
 return
 
+F10::
 调试模式:
 Critical, On
 if (调试模式=1)
@@ -397,7 +398,6 @@ else
 Critical, Off
 return
 
-F12::
 控件匹配:
 Critical, On
 if (StaticSearch=1)

@@ -9,11 +9,29 @@ if (Mode=1) and !GetKeyState("XButton1", "P")
   loop
   {
     Sleep 30
-    if !GetKeyState("Enter", "P") and !GetKeyState("NumpadEnter", "P")
+    PressDuration:=A_TickCount-EnterPressTime
+    if (PressDuration>500) ;长按
+    {
+      Send {Enter}
+      Send {MButton}
+      BlockInput MouseMoveOff
+      MouseBlockInput:=0
+      loop
+      {
+        Sleep 30
+        if !GetKeyState("Enter", "P") and !GetKeyState("NumpadEnter", "P")
+        {
+          BlockInput MouseMoveOff
+          MouseBlockInput:=0
+          Enter_presses:=0
+          return
+        }
+      }
+    }
+    else if !GetKeyState("Enter", "P") and !GetKeyState("NumpadEnter", "P")
       break
   }
   
-  PressDuration:=A_TickCount-EnterPressTime
   if (PressDuration<=500) ;点击
   {
     if (Enter_presses > 0) ; SetTimer 已经启动, 所以我们记录键击.
@@ -28,13 +46,6 @@ if (Mode=1) and !GetKeyState("XButton1", "P")
       return
     }
   }
-  else if (PressDuration>500) ;长按
-  {
-    Send {MButton}
-    BlockInput MouseMoveOff
-    MouseBlockInput:=0
-  }
-  return
 }
 else if (Mode=2)
 {
