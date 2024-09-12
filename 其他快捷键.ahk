@@ -124,7 +124,7 @@ loop
     Send {BackSpace}
     break
   }
-  else if (A_TickCount-BackSpaceRecord>1000)
+  else if (A_TickCount-BackSpaceRecord>500)
   {
     Send {del}
     KeyWait, BackSpace

@@ -200,6 +200,8 @@ SK:=0
 TTD:=0
 后退拖动:=0
 WheelTickCount:=0
+WheelLeftRecord:=0
+WheelRightRecord:=0
 旧前进按下:=A_TickCount
 旧后退按下:=A_TickCount
 暂停数字:=0
@@ -251,7 +253,7 @@ return
 Run, %A_ScriptDir%\快捷键设置.ini
 return
 
-$^Down::
+$+Down::
 3D摇杆:
 Critical, On
 if (3D摇杆=1)

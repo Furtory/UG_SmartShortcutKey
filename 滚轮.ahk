@@ -25,7 +25,7 @@ else if (Mode=1) or GetKeyState("XButton1", "P")
   else ; 否则, 这是新开始系列中的首次按下. 把次数设为 1 并启动计时器
   {
     WheelUp_presses := 1
-    SetTimer, CWheelUp, -400 ; 在 350 毫秒内等待更多的键击.
+    SetTimer, CWheelUp, -300 ; 在 350 毫秒内等待更多的键击.
     return
   }
 }
@@ -74,7 +74,7 @@ else if (Mode=1) or GetKeyState("XButton1", "P")
   else ; 否则, 这是新开始系列中的首次按下. 把次数设为 1 并启动计时器
   {
     WheelDown_presses := 1
-    SetTimer, CWheelDown, -400 ; 在 350 毫秒内等待更多的键击.
+    SetTimer, CWheelDown, -300 ; 在 350 毫秒内等待更多的键击.
     return
   }
 }
@@ -95,19 +95,31 @@ if (WheelDown_presses >= 3) ; 此键按下了三次及以上.
   Sleep 200
   ; ToolTip 三连击
 }
-WheelUp_presses := 0
+WheelDown_presses := 0
 return
 
 WheelLeft:: ;滚轮左
+if (A_TickCount-WheelLeftRecord<=200)
+{
+  WheelLeftRecord:=A_TickCount
+  return
+}
 GM:=-1
 快捷键:="^z|撤回"
 gosub SK
 GM:=0
+WheelLeftRecord:=A_TickCount
 return
 
 WheelRight:: ;滚轮右
+if (A_TickCount-WheelRightRecord<=200)
+{
+  WheelRightRecord:=A_TickCount
+  return
+}
 GM:=-1
 快捷键:="^y|还原"
 gosub SK
 GM:=0
+WheelRightRecord:=A_TickCount
 return
