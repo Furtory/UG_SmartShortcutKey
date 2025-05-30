@@ -1,4 +1,4 @@
-﻿$Enter::
+﻿; $Enter::
 $NumpadEnter::
 if (SK=1)
   return

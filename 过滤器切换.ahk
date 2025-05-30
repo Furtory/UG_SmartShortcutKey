@@ -1,665 +1,854 @@
 ﻿上一个选择过滤器:
-CoordMode, Mouse, Screen
-CoordMode, Pixel, Screen
-if (Mode=3)
-{
-  if (过滤器选择中=0)
-  {
-    过滤器选择中:=1
-    BlockInput MouseMove
-    MouseGetPos, GLQX, GLQY
-    MouseMove 选择过滤器X, 下拉三角Y, 0
-    Sleep 30
-    Send {LButton}
-    
-    gosub 列表识别
-    最大建模选择过滤器位置:=最大选择过滤器位置
-    
-    上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*建模选择过滤器位置
-    上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-    MouseMove, 上下移动X, 上下移动Y, 0
-    
-    return
-  }
-  
-  建模选择过滤器位置:=建模选择过滤器位置-1
-  if (建模选择过滤器位置<1)
-  {
-    建模选择过滤器位置:=最大建模选择过滤器位置
-  }
-  上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*建模选择过滤器位置
-  上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-  MouseMove, 上下移动X, 上下移动Y, 0
-}
-else if (Mode=2)
-{
-  if (过滤器选择中=0)
-  {
-    过滤器选择中:=1
-    BlockInput MouseMove
-    MouseGetPos, GLQX, GLQY
-    MouseMove 选择过滤器X, 下拉三角Y, 0
-    Sleep 30
-    Send {LButton}
-    
-    gosub 列表识别
-    最大草图选择过滤器位置:=最大选择过滤器位置
-    
-    上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*草图选择过滤器位置
-    上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-    MouseMove, 上下移动X, 上下移动Y, 0
-    
-    return
-  }
-  
-  草图选择过滤器位置:=草图选择过滤器位置-1
-  if (草图选择过滤器位置<1)
-  {
-    草图选择过滤器位置:=最大草图选择过滤器位置
-  }
-  上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*草图选择过滤器位置
-  上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-  MouseMove, 上下移动X, 上下移动Y, 0
-}
+    ; Critical, On
+    CoordMode Mouse, Screen
+    CoordMode Pixel, Screen
+
+    GetUGPos()
+    if (错误=1)
+    {
+        loop
+        {
+            GetUGPos()
+            if (错误=0)
+            {
+                break
+            }
+            else if (错误=1) and (A_Index>3)
+            {
+                ToolTip 警告:UG窗口错误!`nUG X%UGX% Y%UGY% W%UGW% H%UGH%
+                BlockInput MouseMoveOff
+                ; Critical, Off
+                Return
+            }
+        }
+    }
+
+
+    if (下拉三角Y=0) or (下拉三角Y="") or (下拉三角Y="ERROR")
+    {
+        gosub 手动下拉三角位置获取
+    }
+
+    if (WinExist("ahk_class NX_SURFACE_WND_WITH_SYS_DROPSHADOW")=0)
+    {
+        BlockInput MouseMove
+        MouseGetPos 初始位置X, 初始位置Y
+        MouseMove UGX+选择过滤器X, UGY+下拉三角Y, 0
+        Sleep 30
+        Send {LButton}
+        gosub 列表识别
+        if (超时=1)
+        {
+            ToolTip 警告:超时!`nUG X%UGX% Y%UGY% W%UGW% H%UGH%
+            BlockInput MouseMoveOff
+            ; Critical, Off
+            Return
+        }
+
+        if (Mode=3)
+        {
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*建模选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+        }
+        else if (Mode=2)
+        {
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*草图选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+        }
+        SetTimer 确认选择过滤器, -1500
+    }
+    else if (WinExist("ahk_class NX_SURFACE_WND_WITH_SYS_DROPSHADOW")!=0)
+    {
+        SetTimer 确认选择过滤器, -800
+        if (Mode=3)
+        {
+            if (过滤器选择中=0)
+            {
+                过滤器选择中:=1
+
+                gosub 列表识别
+                if (超时=1)
+                {
+                    ToolTip 警告:超时!`nUG X%UGX% Y%UGY% W%UGW% H%UGH%
+                    BlockInput MouseMoveOff
+                    ; Critical, Off
+                    Return
+                }
+                最大建模选择过滤器位置:=最大选择过滤器位置
+
+                上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*建模选择过滤器位置
+                上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+                MouseMove 上下移动X, 上下移动Y, 0
+
+                return
+            }
+
+            建模选择过滤器位置:=建模选择过滤器位置-1
+            if (建模选择过滤器位置<1)
+            {
+                建模选择过滤器位置:=最大建模选择过滤器位置
+            }
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*建模选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+        }
+        else if (Mode=2)
+        {
+            if (过滤器选择中=0)
+            {
+                过滤器选择中:=1
+
+                gosub 列表识别
+                if (超时=1)
+                {
+                    ToolTip 警告:超时!`nUG X%UGX% Y%UGY% W%UGW% H%UGH%
+                    BlockInput MouseMoveOff
+                    ; Critical, Off
+                    Return
+                }
+                最大草图选择过滤器位置:=最大选择过滤器位置
+
+                上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*草图选择过滤器位置
+                上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+                MouseMove 上下移动X, 上下移动Y, 0
+
+                return
+            }
+
+            草图选择过滤器位置:=草图选择过滤器位置-1
+            if (草图选择过滤器位置<1)
+            {
+                草图选择过滤器位置:=最大草图选择过滤器位置
+            }
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*草图选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+        }
+    }
+    ; Critical, Off
 return
 
 下一个选择过滤器:
-CoordMode, Mouse, Screen
-CoordMode, Pixel, Screen
-if (Mode=3)
-{
-  if (过滤器选择中=0)
-  {
-    过滤器选择中:=1
-    BlockInput MouseMove
-    MouseGetPos, GLQX, GLQY
-    MouseMove 选择过滤器X, 下拉三角Y, 0
-    Sleep 30
-    Send {LButton}
-    
-    gosub 列表识别
-    最大建模选择过滤器位置:=最大选择过滤器位置
-    
-    上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*建模选择过滤器位置
-    上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-    MouseMove, 上下移动X, 上下移动Y, 0
-    return
-  }
-  
-  建模选择过滤器位置:=建模选择过滤器位置+1
-  if (建模选择过滤器位置>最大建模选择过滤器位置)
-  {
-    建模选择过滤器位置:=1
-  }
-  上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*建模选择过滤器位置
-  上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-  MouseMove, 上下移动X, 上下移动Y, 0
-}
-else if (Mode=2)
-{
-  if (过滤器选择中=0)
-  {
-    过滤器选择中:=1
-    BlockInput MouseMove
-    MouseGetPos, GLQX, GLQY
-    MouseMove 选择过滤器X, 下拉三角Y, 0
-    Sleep 30
-    Send {LButton}
-    
-    gosub 列表识别
-    最大草图选择过滤器位置:=最大选择过滤器位置
-    
-    上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*草图选择过滤器位置
-    上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-    MouseMove, 上下移动X, 上下移动Y, 0
-    return
-  }
-  
-  草图选择过滤器位置:=草图选择过滤器位置+1
-  if (草图选择过滤器位置>最大草图选择过滤器位置)
-  {
-    草图选择过滤器位置:=1
-  }
-  上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*草图选择过滤器位置
-  上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-  MouseMove, 上下移动X, 上下移动Y, 0
-}
+    ; Critical, On
+    CoordMode Mouse, Screen
+    CoordMode Pixel, Screen
+
+    GetUGPos()
+    if (错误=1)
+    {
+        loop
+        {
+            GetUGPos()
+            if (错误=0)
+            {
+                break
+            }
+            else if (错误=1) and (A_Index>3)
+            {
+                ToolTip 警告:UG窗口错误!`nUG X%UGX% Y%UGY% W%UGW% H%UGH%
+                BlockInput MouseMoveOff
+                ; Critical, Off
+                Return
+            }
+        }
+    }
+
+    if (下拉三角Y=0) or (下拉三角Y="") or (下拉三角Y="ERROR")
+    {
+        gosub 手动下拉三角位置获取
+    }
+
+
+    if (WinExist("ahk_class NX_SURFACE_WND_WITH_SYS_DROPSHADOW")=0)
+    {
+        BlockInput MouseMove
+        MouseGetPos 初始位置X, 初始位置Y
+        MouseMove UGX+选择过滤器X, UGY+下拉三角Y, 0
+        Sleep 30
+        Send {LButton}
+        gosub 列表识别
+        if (超时=1)
+        {
+            ToolTip 警告:超时!`nUG X%UGX% Y%UGY% W%UGW% H%UGH%
+            BlockInput MouseMoveOff
+            ; Critical, Off
+            Return
+        }
+
+        if (Mode=3)
+        {
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*建模选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+        }
+        else if (Mode=2)
+        {
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*草图选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+        }
+        SetTimer 确认选择过滤器, -1500
+    }
+    else if (WinExist("ahk_class NX_SURFACE_WND_WITH_SYS_DROPSHADOW")!=0)
+    {
+        SetTimer 确认选择过滤器, -800
+    if (Mode=3)
+    {
+        if (过滤器选择中=0)
+        {
+            过滤器选择中:=1
+
+            gosub 列表识别
+            if (超时=1)
+            {
+                ToolTip 警告:超时!`nUG X%UGX% Y%UGY% W%UGW% H%UGH%
+                BlockInput MouseMoveOff
+                ; Critical, Off
+                Return
+            }
+            最大建模选择过滤器位置:=最大选择过滤器位置
+
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*建模选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+            return
+        }
+
+        建模选择过滤器位置:=建模选择过滤器位置+1
+        if (建模选择过滤器位置>最大建模选择过滤器位置)
+        {
+            建模选择过滤器位置:=1
+        }
+        上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*建模选择过滤器位置
+        上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+        MouseMove 上下移动X, 上下移动Y, 0
+    }
+    else if (Mode=2)
+    {
+        if (过滤器选择中=0)
+        {
+            过滤器选择中:=1
+
+            gosub 列表识别
+            if (超时=1)
+            {
+                ToolTip 警告:超时!`nUG X%UGX% Y%UGY% W%UGW% H%UGH%
+                BlockInput MouseMoveOff
+                ; Critical, Off
+                Return
+            }
+            最大草图选择过滤器位置:=最大选择过滤器位置
+
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*草图选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+            return
+        }
+
+        草图选择过滤器位置:=草图选择过滤器位置+1
+        if (草图选择过滤器位置>最大草图选择过滤器位置)
+        {
+            草图选择过滤器位置:=1
+        }
+        上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*草图选择过滤器位置
+        上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+        MouseMove 上下移动X, 上下移动Y, 0
+        }
+    }
+    ; Critical, Off
 return
 
 [::
-if GetKeyState("]", "P")
-{
-  return
-}
-IniRead, Mode, 软件设置.ini, Mode, Mode
-CoordMode, Mouse, Screen
-CoordMode, Pixel, Screen
-loop
-{
-  if GetKeyState("[", "P") and GetKeyState("]", "P")
-  {
-    重置选择过滤器:=1
-  }
-  if !GetKeyState("[", "P")
-  {
-    break
-  }
-}
-if (下拉三角Y=0) or (下拉三角Y="") or (下拉三角Y="ERROR")
-{
-  gosub 下拉三角位置获取
-}
-BlockInput MouseMove
-MouseGetPos, GLQX, GLQY
-MouseMove 选择过滤器X, 下拉三角Y, 0
-Sleep 30
-Send {LButton}
-if (Mode=3)
-{
-  gosub 列表识别
-  最大建模选择过滤器位置:=最大选择过滤器位置
-  
-  if (重置选择过滤器=1)
-  {
-    过滤器选择中:=1
-    建模选择过滤器位置:=1
-  }
-  else
-  {
-    if (过滤器选择中=0)
+    Critical, On
+    ; ToolTip 1
+    if GetKeyState("]", "P")
     {
-      过滤器选择中:=1
+        return
     }
-    else
+    IniRead Mode, 软件设置.ini, Mode, Mode
+    CoordMode Mouse, Screen
+    CoordMode Pixel, Screen
+
+    GetUGPos()
+    if (错误=1)
     {
-      建模选择过滤器位置:=建模选择过滤器位置-1
-      if (建模选择过滤器位置<1)
-      {
-        建模选择过滤器位置:=最大建模选择过滤器位置
-      }
+        loop
+        {
+            GetUGPos()
+            if (错误=0)
+            {
+                break
+            }
+            else if (错误=1) and (A_Index>3)
+            {
+                ToolTip 警告:UG窗口错误!`nUG X%UGX% Y%UGY% W%UGW% H%UGH%
+                BlockInput MouseMoveOff
+                Critical, Off
+                Return
+            }
+        }
     }
-  }
-  
-  上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*建模选择过滤器位置
-  上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-  MouseMove, 上下移动X, 上下移动Y, 0
-  loop
-  {
-    Sleep 50
-    if (A_Index=30) or GetKeyState("[", "P") or GetKeyState("]", "P") or (重置选择过滤器=1)
+
+    loop
     {
-      重置选择过滤器:=0
-      break
+        if GetKeyState("[", "P") and GetKeyState("]", "P")
+        {
+            重置选择过滤器:=1
+        }
+        if !GetKeyState("[", "P")
+        {
+            break
+        }
     }
-  }
-  退出循环:=0
-  loop
-  {
-    Sleep 30
-    if GetKeyState("[", "P")
+
+    if (下拉三角Y=0) or (下拉三角Y="") or (下拉三角Y="ERROR")
     {
-      退出循环:=0
-      建模选择过滤器位置:=建模选择过滤器位置-1
-      if (建模选择过滤器位置<1)
-      {
-        建模选择过滤器位置:=最大建模选择过滤器位置
-      }
-      上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*建模选择过滤器位置
-      上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-      MouseMove, 上下移动X, 上下移动Y, 0
-      KeyWait [
+        gosub 手动下拉三角位置获取
     }
-    else if GetKeyState("]", "P")
+
+    if (WinExist("ahk_class NX_SURFACE_WND_WITH_SYS_DROPSHADOW")=0)
     {
-      退出循环:=0
-      建模选择过滤器位置:=建模选择过滤器位置+1
-      if (建模选择过滤器位置>最大建模选择过滤器位置)
-      {
-        建模选择过滤器位置:=1
-      }
-      上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*建模选择过滤器位置
-      上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-      MouseMove, 上下移动X, 上下移动Y, 0
-      KeyWait ]
+        BlockInput MouseMove
+        MouseGetPos 初始位置X, 初始位置Y
+        MouseMove UGX+选择过滤器X, UGY+下拉三角Y, 0
+        Sleep 30
+        Send {LButton}
+        gosub 列表识别
+        if (超时=1)
+        {
+            ToolTip 警告:超时!`nUG X%UGX% Y%UGY% W%UGW% H%UGH%
+            BlockInput MouseMoveOff
+            Critical, Off
+            Return
+        }
+
+        if (Mode=3)
+        {
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*建模选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+        }
+        else if (Mode=2)
+        {
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*草图选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+        }
+        SetTimer 确认选择过滤器, -1500
     }
-    
-    退出循环:=退出循环+1
-    if (退出循环>10)
+    else if (WinExist("ahk_class NX_SURFACE_WND_WITH_SYS_DROPSHADOW")!=0)
     {
-      break
+        SetTimer 确认选择过滤器, -800
+        if (Mode=3)
+        {
+            最大建模选择过滤器位置:=最大选择过滤器位置
+
+            if (重置选择过滤器=1)
+            {
+                过滤器选择中:=1
+                建模选择过滤器位置:=1
+                重置选择过滤器:=0
+            }
+            else
+            {
+                if (过滤器选择中=0)
+                {
+                    过滤器选择中:=1
+                }
+                else
+                {
+                    建模选择过滤器位置:=建模选择过滤器位置-1
+                    if (建模选择过滤器位置<1)
+                    {
+                        建模选择过滤器位置:=最大建模选择过滤器位置
+                    }
+                }
+            }
+
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*建模选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+
+            建模选择过滤器位置:=建模选择过滤器位置-1
+            if (建模选择过滤器位置<1)
+            {
+                建模选择过滤器位置:=最大建模选择过滤器位置
+            }
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*建模选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+            KeyWait [
+            过滤器选择中:=0
+        }
+        else if (Mode=2)
+        {
+            最大草图选择过滤器位置:=最大选择过滤器位置
+
+            if (重置选择过滤器=1)
+            {
+                过滤器选择中:=1
+                草图选择过滤器位置:=1
+                重置选择过滤器:=0
+            }
+            else
+            {
+                if (过滤器选择中=0)
+                {
+                    过滤器选择中:=1
+                }
+                else
+                {
+                    草图选择过滤器位置:=草图选择过滤器位置-1
+                    if (草图选择过滤器位置<1)
+                    {
+                        草图选择过滤器位置:=最大草图选择过滤器位置
+                    }
+                }
+            }
+
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*草图选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+
+            草图选择过滤器位置:=草图选择过滤器位置-1
+            if (草图选择过滤器位置<1)
+            {
+                草图选择过滤器位置:=最大草图选择过滤器位置
+            }
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*草图选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+            KeyWait [
+            过滤器选择中:=0
+        }
     }
-  }
-  Send {LButton}
-  Sleep 30
-  MouseMove, GLQX, GLQY
-  过滤器选择中:=0
-}
-else if (Mode=2)
-{
-  gosub 列表识别
-  最大草图选择过滤器位置:=最大选择过滤器位置
-  
-  if (重置选择过滤器=1)
-  {
-    过滤器选择中:=1
-    草图选择过滤器位置:=1
-  }
-  else
-  {
-    if (过滤器选择中=0)
-    {
-      过滤器选择中:=1
-    }
-    else
-    {
-      草图选择过滤器位置:=草图选择过滤器位置-1
-      if (草图选择过滤器位置<1)
-      {
-        草图选择过滤器位置:=最大草图选择过滤器位置
-      }
-    }
-  }
-  
-  上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*草图选择过滤器位置
-  上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-  MouseMove, 上下移动X, 上下移动Y, 0
-  loop
-  {
-    Sleep 50
-    if (A_Index=30) or GetKeyState("[", "P") or GetKeyState("]", "P") or (重置选择过滤器=1)
-    {
-      重置选择过滤器:=0
-      break
-    }
-  }
-  退出循环:=0
-  loop
-  {
-    Sleep 30
-    if GetKeyState("[", "P")
-    {
-      退出循环:=0
-      草图选择过滤器位置:=草图选择过滤器位置-1
-      if (草图选择过滤器位置<1)
-      {
-        草图选择过滤器位置:=最大草图选择过滤器位置
-      }
-      上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*草图选择过滤器位置
-      上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-      MouseMove, 上下移动X, 上下移动Y, 0
-      KeyWait [
-    }
-    else if GetKeyState("]", "P")
-    {
-      退出循环:=0
-      草图选择过滤器位置:=草图选择过滤器位置+1
-      if (草图选择过滤器位置>最大草图选择过滤器位置)
-      {
-        草图选择过滤器位置:=1
-      }
-      上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*草图选择过滤器位置
-      上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-      MouseMove, 上下移动X, 上下移动Y, 0
-      KeyWait ]
-    }
-    
-    退出循环:=退出循环+1
-    if (退出循环>10)
-    {
-      break
-    }
-  }
-  Send {LButton}
-  Sleep 30
-  MouseMove, GLQX, GLQY
-  过滤器选择中:=0
-}
-BlockInput MouseMoveOff
-ToolTip
+    Critical, Off
 return
 
 ]::
-if GetKeyState("[", "P")
-{
-  return
-}
-IniRead, Mode, 软件设置.ini, Mode, Mode
-CoordMode, Mouse, Screen
-CoordMode, Pixel, Screen
-loop
-{
-  if GetKeyState("[", "P") and GetKeyState("]", "P")
-  {
-    重置选择过滤器:=1
-  }
-  if !GetKeyState("]", "P")
-  {
-    break
-  }
-}
-if (下拉三角Y=0) or (下拉三角Y="") or (下拉三角Y="ERROR")
-{
-  gosub 下拉三角位置获取
-}
-BlockInput MouseMove
-MouseGetPos, GLQX, GLQY
-MouseMove 选择过滤器X, 下拉三角Y, 0
-Sleep 30
-Send {LButton}
-if (Mode=3)
-{
-  gosub 列表识别
-  最大建模选择过滤器位置:=最大选择过滤器位置
-  
-  if (重置选择过滤器=1)
-  {
-    过滤器选择中:=1
-    建模选择过滤器位置:=1
-  }
-  else
-  {
-    if (过滤器选择中=0)
-    {
-      过滤器选择中:=1
-    }
-    else
-    {
-      建模选择过滤器位置:=建模选择过滤器位置+1
-      if (建模选择过滤器位置>最大建模选择过滤器位置)
-      {
-        建模选择过滤器位置:=1
-      }
-    }
-  }
-  
-  上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*建模选择过滤器位置
-  上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-  MouseMove, 上下移动X, 上下移动Y, 0
-  loop
-  {
-    Sleep 50
-    if (A_Index=30) or GetKeyState("[", "P") or GetKeyState("]", "P") or (重置选择过滤器=1)
-    {
-      重置选择过滤器:=0
-      break
-    }
-  }
-  退出循环:=0
-  loop
-  {
-    Sleep 30
     if GetKeyState("[", "P")
     {
-      退出循环:=0
-      建模选择过滤器位置:=建模选择过滤器位置-1
-      if (建模选择过滤器位置<1)
-      {
-        建模选择过滤器位置:=最大建模选择过滤器位置
-      }
-      上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*建模选择过滤器位置
-      上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-      MouseMove, 上下移动X, 上下移动Y, 0
-      KeyWait [
+        return
     }
-    else if GetKeyState("]", "P")
+    Critical, On
+    IniRead Mode, 软件设置.ini, Mode, Mode
+    CoordMode Mouse, Screen
+    CoordMode Pixel, Screen
+
+    GetUGPos()
+    if (错误=1)
     {
-      退出循环:=0
-      建模选择过滤器位置:=建模选择过滤器位置+1
-      if (建模选择过滤器位置>最大建模选择过滤器位置)
-      {
-        建模选择过滤器位置:=1
-      }
-      上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*建模选择过滤器位置
-      上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-      MouseMove, 上下移动X, 上下移动Y, 0
-      KeyWait ]
+        loop
+        {
+            GetUGPos()
+            if (错误=0)
+            {
+                break
+            }
+            else if (错误=1) and (A_Index>3)
+            {
+                ToolTip 警告:UG窗口错误!`nUG X%UGX% Y%UGY% W%UGW% H%UGH%
+                BlockInput MouseMoveOff
+                Critical, Off
+                Return
+            }
+        }
     }
-    
-    退出循环:=退出循环+1
-    if (退出循环>10)
+
+    loop
     {
-      break
+        if GetKeyState("[", "P") and GetKeyState("]", "P")
+        {
+            重置选择过滤器:=1
+        }
+        if !GetKeyState("]", "P")
+        {
+            break
+        }
     }
-  }
-  Send {LButton}
-  Sleep 30
-  MouseMove, GLQX, GLQY
-  过滤器选择中:=0
-}
-else if (Mode=2)
-{
-  gosub 列表识别
-  最大草图选择过滤器位置:=最大选择过滤器位置
-  
-  if (重置选择过滤器=1)
-  {
-    过滤器选择中:=1
-    草图选择过滤器位置:=1
-  }
-  else
-  {
-    if (过滤器选择中=0)
+
+    if (下拉三角Y=0) or (下拉三角Y="") or (下拉三角Y="ERROR")
     {
-      过滤器选择中:=1
+        gosub 手动下拉三角位置获取
     }
-    else
+
+
+    if (WinExist("ahk_class NX_SURFACE_WND_WITH_SYS_DROPSHADOW")=0)
     {
-      建模选择过滤器位置:=建模选择过滤器位置+1
-      if (草图选择过滤器位置>最大草图选择过滤器位置)
-      {
-        草图选择过滤器位置:=1
-      }
+        BlockInput MouseMove
+        MouseGetPos 初始位置X, 初始位置Y
+        MouseMove UGX+选择过滤器X, UGY+下拉三角Y, 0
+        Sleep 30
+        Send {LButton}
+        gosub 列表识别
+        if (超时=1)
+        {
+            ToolTip 警告:超时!`nUG X%UGX% Y%UGY% W%UGW% H%UGH%
+            BlockInput MouseMoveOff
+            Critical, Off
+            Return
+        }
+
+        if (Mode=3)
+        {
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*建模选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+        }
+        else if (Mode=2)
+        {
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*草图选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+        }
+        SetTimer 确认选择过滤器, -1500
     }
-  }
-  
-  上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*草图选择过滤器位置
-  上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-  MouseMove, 上下移动X, 上下移动Y, 0
-  loop
-  {
-    Sleep 50
-    if (A_Index=30) or GetKeyState("[", "P") or GetKeyState("]", "P") or (重置选择过滤器=1)
+    else if (WinExist("ahk_class NX_SURFACE_WND_WITH_SYS_DROPSHADOW")!=0)
     {
-      重置选择过滤器:=0
-      break
+        SetTimer 确认选择过滤器, -800
+        if (Mode=3)
+        {
+            最大建模选择过滤器位置:=最大选择过滤器位置
+
+            if (重置选择过滤器=1)
+            {
+                过滤器选择中:=1
+                建模选择过滤器位置:=1
+                重置选择过滤器:=0
+            }
+            else
+            {
+                if (过滤器选择中=0)
+                {
+                    过滤器选择中:=1
+                }
+                else
+                {
+                    建模选择过滤器位置:=建模选择过滤器位置+1
+                    if (建模选择过滤器位置>最大建模选择过滤器位置)
+                    {
+                        建模选择过滤器位置:=1
+                    }
+                }
+            }
+
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*建模选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+
+            建模选择过滤器位置:=建模选择过滤器位置+1
+            if (建模选择过滤器位置>最大建模选择过滤器位置)
+            {
+                建模选择过滤器位置:=1
+            }
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*建模选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+            KeyWait ]
+            过滤器选择中:=0
+        }
+        else if (Mode=2)
+        {
+            最大草图选择过滤器位置:=最大选择过滤器位置
+
+            if (重置选择过滤器=1)
+            {
+                过滤器选择中:=1
+                草图选择过滤器位置:=1
+                重置选择过滤器:=0
+            }
+            else
+            {
+                if (过滤器选择中=0)
+                {
+                    过滤器选择中:=1
+                }
+                else
+                {
+                    建模选择过滤器位置:=建模选择过滤器位置+1
+                    if (草图选择过滤器位置>最大草图选择过滤器位置)
+                    {
+                        草图选择过滤器位置:=1
+                    }
+                }
+            }
+
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*草图选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+
+            草图选择过滤器位置:=草图选择过滤器位置+1
+            if (草图选择过滤器位置>最大草图选择过滤器位置)
+            {
+                草图选择过滤器位置:=1
+            }
+            上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*草图选择过滤器位置
+            上下移动X:=UGX+选择过滤器X-Round(缩放率*20)
+            MouseMove 上下移动X, 上下移动Y, 0
+            KeyWait ]
+            过滤器选择中:=0
+        }
     }
-  }
-  退出循环:=0
-  loop
-  {
-    Sleep 30
-    if GetKeyState("[", "P")
-    {
-      退出循环:=0
-      草图选择过滤器位置:=草图选择过滤器位置-1
-      if (草图选择过滤器位置<1)
-      {
-        草图选择过滤器位置:=最大草图选择过滤器位置
-      }
-      上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*草图选择过滤器位置
-      上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-      MouseMove, 上下移动X, 上下移动Y, 0
-      KeyWait [
-    }
-    else if GetKeyState("]", "P")
-    {
-      退出循环:=0
-      草图选择过滤器位置:=草图选择过滤器位置+1
-      if (草图选择过滤器位置>最大草图选择过滤器位置)
-      {
-        草图选择过滤器位置:=1
-      }
-      上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*草图选择过滤器位置
-      上下移动X:=选择过滤器X-Round(A_ScreenHeight/1080*20)
-      MouseMove, 上下移动X, 上下移动Y, 0
-      KeyWait ]
-    }
-    
-    退出循环:=退出循环+1
-    if (退出循环>10)
-    {
-      break
-    }
-  }
-  Send {LButton}
-  Sleep 30
-  MouseMove, GLQX, GLQY
-  过滤器选择中:=0
-}
-BlockInput MouseMoveOff
-ToolTip
+    Critical, Off
 return
 
 `;::
-IniRead, Mode, 软件设置.ini, Mode, Mode
-CoordMode, Mouse, Screen
-CoordMode, Pixel, Screen
+Critical, On
+IniRead Mode, 软件设置.ini, Mode, Mode
+CoordMode Mouse, Screen
+CoordMode Pixel, Screen
+
+GetUGPos()
+if (错误=1)
+{
+    loop
+    {
+        GetUGPos()
+        if (错误=0)
+        {
+            break
+        }
+        else if (错误=1) and (A_Index>3)
+        {
+            ToolTip 警告:UG窗口错误!`nUG X%UGX% Y%UGY% W%UGW% H%UGH%
+            BlockInput MouseMoveOff
+            Critical, Off
+            Return
+        }
+    }
+}
+
 if (下拉三角Y=0) or (下拉三角Y="") or (下拉三角Y="ERROR")
 {
-  gosub 下拉三角位置获取
+    gosub 手动下拉三角位置获取
 }
 BlockInput MouseMove
-MouseGetPos, GLQX, GLQY
-MouseMove 选择范围X, 下拉三角Y, 0
+MouseGetPos 初始位置X, 初始位置Y
+MouseMove UGX+选择范围X, UGY+下拉三角Y, 0
 Sleep 30
 Send {LButton}
 选择范围位置:=选择范围位置-1
 if (选择范围位置<1)
 {
-  选择范围位置:=1
+    选择范围位置:=1
 }
-上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*选择范围位置
-上下移动X:=选择范围X-Round(A_ScreenHeight/1080*20)
-MouseMove, 上下移动X, 上下移动Y, 0
+上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*选择范围位置
+上下移动X:=UGX+选择范围X-Round(缩放率*20)
+MouseMove 上下移动X, 上下移动Y, 0
 Sleep 30
 Send {LButton}
 Sleep 30
-MouseMove, GLQX, GLQY
+MouseMove 初始位置X, 初始位置Y
 BlockInput MouseMoveOff
 ToolTip
+Critical, Off
 return
+
+确认选择过滤器:
+    Send {LButton}
+    Sleep 30
+    MouseMove 初始位置X, 初始位置Y, 0
+    BlockInput MouseMoveOff
+    ToolTip
+Return
+
+$Enter::
+    if (WinExist("ahk_class NX_SURFACE_WND_WITH_SYS_DROPSHADOW")!=0)
+    {
+        SetTimer 确认选择过滤器, -1
+    }
+Return
 
 '::
-IniRead, Mode, 软件设置.ini, Mode, Mode
-CoordMode, Mouse, Screen
-CoordMode, Pixel, Screen
-if (下拉三角Y=0) or (下拉三角Y="") or (下拉三角Y="ERROR")
-{
-  gosub 下拉三角位置获取
-}
-BlockInput MouseMove
-MouseGetPos, GLQX, GLQY
-MouseMove 选择范围X, 下拉三角Y, 0
-Sleep 30
-Send {LButton}
-选择范围位置:=选择范围位置+1
-if (选择范围位置>3)
-{
-  选择范围位置:=3
-}
-上下移动Y:=下拉三角Y+Round(A_ScreenHeight/1080*22)*选择范围位置
-上下移动X:=选择范围X-Round(A_ScreenHeight/1080*20)
-MouseMove, 上下移动X, 上下移动Y, 0
-Sleep 30
-Send {LButton}
-Sleep 30
-MouseMove, GLQX, GLQY
-BlockInput MouseMoveOff
-ToolTip
+    Critical, On
+    IniRead Mode, 软件设置.ini, Mode, Mode
+    CoordMode Mouse, Screen
+    CoordMode Pixel, Screen
+
+    GetUGPos()
+    if (错误=1)
+    {
+        loop
+        {
+            GetUGPos()
+            if (错误=0)
+            {
+                break
+            }
+            else if (错误=1) and (A_Index>3)
+            {
+                ToolTip 警告:UG窗口错误!`nUG X%UGX% Y%UGY% W%UGW% H%UGH%
+                BlockInput MouseMoveOff
+                Critical, Off
+                Return
+            }
+        }
+    }
+
+    if (下拉三角Y=0) or (下拉三角Y="") or (下拉三角Y="ERROR")
+    {
+        gosub 手动下拉三角位置获取
+    }
+    BlockInput MouseMove
+    MouseGetPos 初始位置X, 初始位置Y
+    MouseMove UGX+选择范围X, UGY+下拉三角Y, 0
+    Sleep 30
+    Send {LButton}
+    选择范围位置:=选择范围位置+1
+    if (选择范围位置>3)
+    {
+        选择范围位置:=3
+    }
+    上下移动Y:=UGY+下拉三角Y+Round(缩放率*22)*选择范围位置
+    上下移动X:=UGX+选择范围X-Round(缩放率*20)
+    MouseMove 上下移动X, 上下移动Y, 0
+    Sleep 30
+    Send {LButton}
+    Sleep 30
+    MouseMove 初始位置X, 初始位置Y
+    BlockInput MouseMoveOff
+    ToolTip
+    Critical, Off
 return
 
-下拉三角位置获取:
-IniRead, Mode, 软件设置.ini, Mode, Mode
-ImageSearch 过滤器X, 过滤器Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *1 %A_ScriptDir%\Image\过滤器深色.png
-if (ErrorLevel=0)
-{
-  ToolTip 过滤器深色图标 X%过滤器X% Y%过滤器Y%
-}
-else
-{
-  ToolTip 过滤器深色图标获取失败
-  Sleep 500
-  ImageSearch 过滤器X, 过滤器Y, 0, 0, A_ScreenWidth, A_ScreenHeight, *1 %A_ScriptDir%\Image\过滤器浅色.png
-  if (ErrorLevel=0)
-  {
-    ToolTip 过滤器浅色图标 X%过滤器X% Y%过滤器Y%
-  }
-  else
-  {
-    ToolTip 过滤器浅色图标获取失败
-  }
-}
+GetUGPos(){
+    global 错误
+    global UGX, UGY, UGW, UGH
+    global UGXOLD, UGYOLD, UGWOLD, UGHOLD
 
-Sleep 500
-if (过滤器X!=0) and (过滤器Y!=0)
-{
-  ImageSearch 下拉三角X, 下拉三角Y, 过滤器X-40, 过滤器Y-10, 过滤器X+10, 过滤器Y+30, *10 %A_ScriptDir%\Image\下拉三角.png
-  if (ErrorLevel=0)
-  {
-    选择过滤器X:=下拉三角X+Round(A_ScreenHeight/1080*5)
-    ToolTip 选择过滤器 %选择过滤器X%
-  }
-  else
-  {
-    ToolTip 选择过滤器获取失败
-  }
-  
-  Sleep 500
-  ImageSearch 下拉三角X, 下拉三角Y, 过滤器X+150, 过滤器Y-10, 过滤器X+200, 过滤器Y+30, *10 %A_ScriptDir%\Image\下拉三角.png
-  if (ErrorLevel=0)
-  {
-    选择范围X:=下拉三角X+Round(A_ScreenHeight/1080*5)
-    ToolTip 选择过滤器 %选择范围X%
-  }
-  else
-  {
-    ToolTip 选择范围获取失败
-  }
-  
-  下拉三角Y:=下拉三角Y+Round(A_ScreenHeight/1080*3)
-  IniWrite, %下拉三角Y%, 软件设置.ini, 设置, 下拉三角Y
-  IniWrite, %选择过滤器X%, 软件设置.ini, 设置, 选择过滤器X
-  IniWrite, %选择范围X%, 软件设置.ini, 设置, 选择范围X
+    错误:=0
+    if (UGX!="") and (UGY!="") and (UGW!="") and (UGH!="")
+    {
+        UGXOLD:=UGX
+        UGYOLD:=UGY
+        UGWOLD:=UGW
+        UGHOLD:=UGH
+    }
+
+    WinGetPos UGX, UGY, UGW, UGH, ahk_exe ugraf.exe
+    if (UGXOLD!="") and (UGYOLD!="") and (UGWOLD!="") and (UGHOLD!="")
+    {
+        if (UGH<=A_ScreenHeight*0.8) or (UGW<=1000) ;or (UGW<=A_ScreenWidth*0.6)
+        {
+            UGX:=UGXOLD
+            UGY:=UGYOLD
+            UGW:=UGWOLD
+            UGH:=UGHOLD
+        }
+    }
+    else if (UGH<=A_ScreenHeight*0.8) or (UGW<=1000) ;or (UGW<=A_ScreenWidth*0.6)
+    {
+        错误:=1
+    }
+    Return
 }
-return
 
 手动下拉三角位置获取:
-KeyWait, LButton
-loop
-{
-  ToolTip 请在选择过滤器下拉三角处点击左键以设置
-  if GetKeyState("LButton", "P")
-  {
-    MouseGetPos, 选择过滤器X, 下拉三角Y
-    IniWrite, %下拉三角Y%, 软件设置.ini, 设置, 下拉三角Y
-    IniWrite, %选择过滤器X%, 软件设置.ini, 设置, 选择过滤器X
-    KeyWait, LButton
-    break
-  }
-}
-loop
-{
-  ToolTip 请在选择范围下拉三角处点击左键以设置
-  if GetKeyState("LButton", "P")
-  {
-    MouseGetPos, 选择范围X
-    IniWrite, %选择范围X%, 软件设置.ini, 设置, 选择范围X
-    break
-  }
-}
-loop 500
-{
-  ToolTip 选择过滤器设置完成: X%选择过滤器X% Y%下拉三角Y%`n选择范围设置完成: X%选择范围X% Y%下拉三角Y%
-  Sleep 30
-}
-ToolTip
+    KeyWait LButton
+    WinActivate ahk_exe ugraf.exe
+    Sleep 500
+    CoordMode Mouse, Window
+    CoordMode ToolTip, Window
+
+    GetUGPos()
+    if (错误=1)
+    {
+        loop
+        {
+            GetUGPos()
+            if (错误=0)
+            {
+                break
+            }
+            else if (错误=1) and (A_Index>3)
+            {
+                ToolTip 警告:UG窗口错误!`nUG X%UGX% Y%UGY% W%UGW% H%UGH%
+                BlockInput MouseMoveOff
+                Critical, Off
+                Return
+            }
+        }
+    }
+
+    loop
+    {
+        ToolTip 请在选择过滤器下拉三角处点击左键以设置
+        if GetKeyState("LButton", "P")
+        {
+            Sleep 300
+            KeyWait LButton
+            loop
+            {
+                if (WinExist("ahk_class NX_SURFACE_WND_WITH_SYS_DROPSHADOW")!=0)
+                    Break
+                else if A_Index>1000
+                    Return
+                Sleep 30
+            }
+
+            WinGetPos 下拉列表X, 下拉列表Y, 下拉列表W, 下拉列表H, ahk_class NX_SURFACE_WND_WITH_SYS_DROPSHADOW
+            选择过滤器X:=下拉列表X-UGX+下拉列表W-Round(缩放率*20/2)
+            下拉三角Y:=下拉列表Y-UGY-Round(缩放率*22/2)
+            IniWrite %下拉三角Y%, 软件设置.ini, 设置, 下拉三角Y
+            IniWrite %选择过滤器X%, 软件设置.ini, 设置, 选择过滤器X
+            break
+        }
+    }
+    Sleep 100
+    send {Esc}
+    loop
+    {
+        ToolTip 请在选择范围下拉三角处点击左键以设置
+        if GetKeyState("LButton", "P")
+        {
+            Sleep 300
+            KeyWait LButton
+            loop
+            {
+                if (WinExist("ahk_class NX_SURFACE_WND_WITH_SYS_DROPSHADOW")!=0)
+                    Break
+                else if A_Index>100
+                    Return
+                Sleep 30
+            }
+
+            WinGetPos 下拉列表X, 下拉列表Y, 下拉列表W, 下拉列表H, ahk_class NX_SURFACE_WND_WITH_SYS_DROPSHADOW
+            选择范围X:=下拉列表X-UGX+下拉列表W-Round(缩放率*20/2)
+            IniWrite %选择范围X%, 软件设置.ini, 设置, 选择范围X
+            break
+        }
+    }
+    Sleep 100
+    send {Esc}
+    ToolTip 选择范围, 选择范围X, 下拉三角Y, 3
+    ToolTip 选择过滤器, 选择过滤器X, 下拉三角Y, 2
+    loop 200
+    {
+        ToolTip 选择过滤器设置完成: X%选择过滤器X% Y%下拉三角Y%`n选择范围设置完成: X%选择范围X% Y%下拉三角Y%
+        Sleep 30
+    }
+    ToolTip
+    ToolTip, , , ,2
+    ToolTip, , , ,3
 return
 
 列表识别:
-CoordMode, Mouse, Screen
-CoordMode, ToolTip, Screen
-MouseGetPos, 调试MX, 调试MY, 调试WID
-WinGetClass, 调试WC, ahk_id %调试WID%
-WinGetPos, 调试WX, 调试WY, 调试WW, 调试WH, ahk_id %调试WID%
-最大选择过滤器位置:=Floor(调试WH/(A_ScreenHeight/1080*22))
+    超时:=0
+    loop
+    {
+        if (WinExist("ahk_class NX_SURFACE_WND_WITH_SYS_DROPSHADOW")!=0)
+            Break
+        else if A_Index>100
+        {
+            超时:=1
+            Return
+        }
+        Sleep 30
+    }
+
+    WinGetPos 下拉列表X, 下拉列表Y, 下拉列表W, 下拉列表H, ahk_class NX_SURFACE_WND_WITH_SYS_DROPSHADOW
+    最大选择过滤器位置:=Floor(下拉列表H/(缩放率*22))
+    ; ToolTip 最大选择过滤器位置%最大选择过滤器位置%
 return
